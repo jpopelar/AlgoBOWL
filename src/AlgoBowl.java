@@ -8,8 +8,10 @@ import java.util.Scanner;
 public class AlgoBowl {
 	private static final String INPUTFILE1 = "Inputs\\input.txt";
 	
+	//Machines and Tasks store in original order, sortedMachines and sortedTasks store sorted order.
 	public static ArrayList<Machine> machines, sortedMachines;
 	public static ArrayList<Task> tasks, sortedTasks;
+	
 	public static int numTasks;
 	public static int numMachines;
 	
