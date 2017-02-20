@@ -24,4 +24,9 @@ public class Machine {
 			totalRuntime = totalRuntime + assignedTasks.get(i).runtime / speed;
 		}
 	}
+	
+	public double getTotalRuntime(){
+		computeTotalRuntime();
+		return totalRuntime;
+	}
 }

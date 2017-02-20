@@ -1,19 +1,21 @@
-import java.awt.Point;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class AlgoBowl {
 	private static final String INPUTFILE1 = "Inputs\\input.txt";
+	private static final String OUTPUTFILE1 = "Outputs\\output.txt";
 	
 	//Machines and Tasks store in original order, sortedMachines and sortedTasks store sorted order.
 	public static ArrayList<Machine> machines, sortedMachines;
 	public static ArrayList<Task> tasks, sortedTasks;
 	
-	public static int numTasks;
-	public static int numMachines;
+	public static int numTasks, numMachines;
+	public static double maxTotalRuntime;
 	
 	public static void readInput(String fileName) throws IOException
 	{
@@ -81,11 +83,67 @@ public class AlgoBowl {
 		}
 	}
 	
+	public static void assignTasks(){
+		//Implement the algorithm here
+	}
+	
+	public static void writeOutput(String fileName) throws IOException{
+		BufferedWriter bw = null;
+		FileWriter fw = null;
+		
+		try
+		{
+			fw = new FileWriter(fileName,true);
+			bw = new BufferedWriter(fw);
+			
+			//First line: maximum total runtime
+			bw.write(String.format("%.2f", maxTotalRuntime));	
+			bw.newLine();
+			
+			//Following lines: Assigned task IDs for each machine
+			for(int i = 0; i < machines.size(); i++){
+				ArrayList<Task> temp = machines.get(i).assignedTasks;
+				for(int j = 0; j < temp.size(); j++){
+					bw.write(temp.get(j).index + " ");
+				}
+				bw.newLine();
+			}
+		} 
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		} 
+		finally 
+		{
+			try{
+				if(bw != null)
+					bw.close();
+				if(fw != null)
+					fw.close();
+			}
+			catch (IOException ex) 
+			{
+				ex.printStackTrace();
+			}
+		}	
+	}
+	
+	public static void findMaxTotalRuntime(){
+		maxTotalRuntime = sortedMachines.get(0).getTotalRuntime();
+		for(int i = 1; i < sortedMachines.size(); i++){
+			if(sortedMachines.get(i).getTotalRuntime() > maxTotalRuntime){
+				maxTotalRuntime = sortedMachines.get(i).getTotalRuntime();
+			}
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 		readInput(INPUTFILE1);
 		sortMachines();
 		sortTasks();
-
+		
+		assignTasks();		
+		findMaxTotalRuntime();
 		
 		
 		
