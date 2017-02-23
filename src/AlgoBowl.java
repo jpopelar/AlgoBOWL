@@ -137,13 +137,87 @@ public class AlgoBowl {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
-		readInput(INPUTFILE1);
-		sortMachines();
-		sortTasks();
+	public static boolean verifier(String inputFile, String outputFile) throws IOException{
+		readInput(inputFile);
+		double result = 0;
+		int machineID, taskID;
+		double maxRuntime;
+		double currentRuntime = 0;
 		
-		assignTasks();		
-		findMaxTotalRuntime();
+		//Task ID starts with 1
+		Scanner s = null;
+		String[] theLine;
+		try
+		{
+			s = new Scanner(new FileReader(outputFile));
+			result = Double.parseDouble(s.nextLine());		//read maximum runtime in result
+			
+			//Read the first machine
+			machineID = 0;
+			theLine = s.nextLine().split(" ");	//The line of task runtimes
+			for(int i = 0; i < theLine.length; i++){
+				taskID = Integer.parseInt(theLine[i])-1;
+				currentRuntime = currentRuntime + tasks.get(taskID).runtime / machines.get(machineID).speed;
+			}
+			maxRuntime = currentRuntime;
+			
+			//Read the next machine if it exists
+			while(s.hasNextLine()){
+				machineID++;
+				theLine = s.nextLine().split(" ");
+				currentRuntime = 0;
+				
+				for(int i = 0; i < theLine.length; i++){
+					taskID = Integer.parseInt(theLine[i])-1;
+					currentRuntime = currentRuntime + tasks.get(taskID).runtime / machines.get(machineID).speed;
+				}
+				
+				if(maxRuntime < currentRuntime){
+					maxRuntime = currentRuntime;
+				}
+			}
+			
+			//Return results, using a 1% tolerance
+			if(Math.abs(maxRuntime - result) / maxRuntime <= 0.01){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		return false;		
+	}
+	
+	public static void main(String[] args) throws IOException {
+		int option = 0;		//If 0, make new input. If 1, run algorithm with existing input. If 2 or else, run verifier.
+		
+		if(option == 2){
+			//Make new input
+			RNG.createInput(INPUTFILE1);
+		}
+		else if(option == 1){
+			//Run algorithm with existing input
+			readInput(INPUTFILE1);
+			sortMachines();
+			sortTasks();
+			
+			assignTasks();		
+			findMaxTotalRuntime();
+		}
+		else{
+			//Run verifier
+			System.out.println(verifier(INPUTFILE1, OUTPUTFILE1));
+		}
+		
+		
+		
+		
+		
+
 		
 		
 		
