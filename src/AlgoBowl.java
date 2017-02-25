@@ -102,7 +102,7 @@ public class AlgoBowl {
 			
 			//Following lines: Assigned task IDs for each machine
 			for(int i = 0; i < machines.size(); i++){
-				ArrayList<Task> temp = machines.get(i).assignedTasks;
+				ArrayList<Task> temp = machines.get(i).getTasks();
 				for(int j = 0; j < temp.size(); j++){
 					bw.write(temp.get(j).index + " ");
 				}
@@ -189,6 +189,8 @@ public class AlgoBowl {
 		{
 			e.printStackTrace();
 		}
+		finally {s.close();}
+		
 		return false;		
 	}
 	
@@ -211,15 +213,7 @@ public class AlgoBowl {
 		else{
 			//Run verifier
 			System.out.println(verifier(INPUTFILE1, OUTPUTFILE1));
-		}
-		
-		
-		
-		
-		
-
-		
-		
+		}		
 		
 	}
 }
