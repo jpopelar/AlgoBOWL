@@ -87,6 +87,34 @@ public class AlgoBowl {
 		//Implement the algorithm here
 	}
 	
+	public static void avgLoadBalanceHeuristic() throws IOException{
+		//Goal: each processor takes a share of the work based on its speed
+		
+		//First calculate the total time units needed for all tasks
+		double totTime = 0;
+		for (Task t: tasks) totTime += t.runtime;
+		
+		//Then calculate the total speed of all processors
+		int totSpeed = 0;
+		for (Machine m: machines) totSpeed += m.speed;
+		
+		//Now, assume we have totSpeed machines all of speed 1
+		//How much work would each machine need to do on average in a perfect world?
+		double avgWork = totTime / totSpeed;
+		
+		//The heuristic then goes something like this:
+		//For each task, starting with the longest:
+		//  Find the fastest processor whose load is below avgWork
+		//  If that assignment would put its load above avgWork, bookmark that processor and examine the next one
+		//  If we can assign the task to a processor and keep its load below avgWork, then make the assignment
+		//  Otherwise, assign it to the bookmarked processor
+		//  Theoretically, we should not encounter the case where all processors are above avgWork with tasks still to assign
+		//Complexity: O(n*k) (worst case we have to examine each processor for each task)
+		
+		//End by printing the output file!
+		writeOutput("avgLoadBalance.txt");
+	}
+	
 	public static void writeOutput(String fileName) throws IOException{
 		BufferedWriter bw = null;
 		FileWriter fw = null;
