@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Machine {
 	public int index, speed;
 	public double totalRuntime;
-	private ArrayList<Task> assignedTasks;
+	ArrayList<Task> assignedTasks;
 	
 	public Machine(int index, int speed){
 		this.index = index;

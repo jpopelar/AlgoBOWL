@@ -84,10 +84,97 @@ public class AlgoBowl {
 	}
 	
 	public static void assignTasks(){
-		//Implement the algorithm here
+		/*	
+		In the limit as tasks become smaller and more divisible relative to the total workload, each machine should perform an amount of work proportional to its fraction of the total work-power.
+		Use this as a limit to fill the machines.
+		
+		Sum the work cost over all tasks (TotalWork). This is the unit of work to be performed.
+		
+		In the smooth-task limit, each machine should perform ( TotalWork * (Machine.speed/ sum(Machine.speed)) ) work.
+		TargetMachineCapacity = ( TotalWork * (Machine.speed/ sum(Machine.speed)) )
+		MachineCapacity = TargetMachineCapacity - sum( machine.assignedTasks)*Machine.speed 
+		
+		While numberRemainingTasks > 0
+		
+			Case 1: max(tasks) larger than max( MachineCapacity ):
+				// Heuristic: Assign the task to the machine with the largest MachineCapacity to minimize over fill
+				Assign task with max(Task.runtime) to machine with max(MachineCapacity)
+			
+			Case 2: no tasks larger than max( MachineCapacity ):
+				// Heuristic: Large tasks will be harder to place. Attempt to place them first
+				// Heuristic: Attempt to get as close as possible to the balanced load case. eg. all machines are at exactly TargetMachineCapacity
+				Assign task with max(Task.runtime) to the machine with min( Task.runtime - MachineCapacity )
+		
+		End While
+	*/
+	
+	int totalWork = 0;
+	int sumMachineSpeeds = 0;
+	double[] targetMachineCapacity = new double[machines.size()];
+	double[] machineCapacity = new double[machines.size()];
+	
+	//Find totalWork
+	for(int i=0; i<tasks.size(); i++) {
+		totalWork = totalWork + tasks.get(i).runtime;			
 	}
 	
-	public static void avgLoadBalanceHeuristic() throws IOException{
+	//Sum Machine Speeds
+	for(int i=0; i<machines.size(); i++) {
+		sumMachineSpeeds = sumMachineSpeeds + machines.get(i).speed;
+	}
+	
+	//Find the target capacity for each machine
+	for(int i=0; i<machines.size(); i++) {
+		targetMachineCapacity[i] = totalWork * ((double) machines.get(i).speed / sumMachineSpeeds );
+		//Set the initial capacity to the target capacity
+		machineCapacity[i] = targetMachineCapacity[i];
+	}
+	
+	for(int i=sortedTasks.size()-1; i>=0; i--) {
+		// max machineCapacity
+		double maxMC = 0;
+		int maxMIndex = 0;
+		for(int j=0; j<machineCapacity.length; j++) {
+			if(machineCapacity[j] > maxMC) {
+				maxMIndex = j;
+				maxMC = machineCapacity[j];
+			}
+		}
+		
+		// case 1
+		if( sortedTasks.get(i).runtime > maxMC) {
+			Machine temp = machines.get(maxMIndex);
+			temp.assignedTasks.add(sortedTasks.get(i));
+			machines.set(maxMIndex, temp);
+			//update machineCapacity
+			machineCapacity[maxMIndex] = machineCapacity[maxMIndex] - sortedTasks.get(i).runtime;
+			
+			
+		// case 2
+		} else { 
+			//min of difference between machineCapacity and largest task duration
+			double taskCapacityDiff = Double.MAX_VALUE;
+			int diffIndex=0;
+			double tempDiff;
+			for(int j=0; j<machineCapacity.length;j++){
+				tempDiff = machineCapacity[j] - tasks.get(i).runtime;
+				if( ( tempDiff < taskCapacityDiff) && ( tempDiff > 0 )) {
+					taskCapacityDiff = machineCapacity[j] - tasks.get(i).runtime;
+					diffIndex = j;
+				}
+			}
+			// assign to machine
+			Machine temp = machines.get(diffIndex);
+			temp.assignedTasks.add(sortedTasks.get(i));
+			machines.set(diffIndex, temp);
+			//update machineCapacity
+			machineCapacity[diffIndex] = machineCapacity[diffIndex] - sortedTasks.get(i).runtime;
+		}
+	}
+		
+	}
+	
+	public static void avgLoadBalanceHeuristic(String fileName) throws IOException{
 		//Goal: each processor takes a share of the work based on its speed
 		
 		//First calculate the total time units needed for all tasks
@@ -129,7 +216,8 @@ public class AlgoBowl {
 		//Complexity: O(n*k) (worst case we have to examine each processor for each task)
 		
 		//End by printing the output file!
-		writeOutput("avgLoadBalance.txt");
+		findMaxTotalRuntime();
+		writeOutput(fileName);
 	}
 	
 	public static void writeOutput(String fileName) throws IOException{
@@ -138,7 +226,7 @@ public class AlgoBowl {
 		
 		try
 		{
-			fw = new FileWriter(fileName,true);
+			fw = new FileWriter(fileName);
 			bw = new BufferedWriter(fw);
 			
 			//First line: maximum total runtime
@@ -240,9 +328,9 @@ public class AlgoBowl {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		int option = 0;		//If 0, make new input. If 1, run algorithm with existing input. If 2 or else, run verifier.
+		int option = 2;		//0: make new input. 1: Run Chamal's algorithm. 2: Run Jared's algorithm. 3. Run verifier
 		
-		if(option == 2){
+		if(option == 0){
 			//Make new input
 			RNG.createInput(INPUTFILE1);
 		}
@@ -254,6 +342,17 @@ public class AlgoBowl {
 			
 			assignTasks();		
 			findMaxTotalRuntime();
+			
+			writeOutput(OUTPUTFILE1);
+		}
+		else if(option == 2){
+			//Run algorithm with existing input
+			readInput(INPUTFILE1);
+			sortMachines();
+			sortTasks();
+			
+			avgLoadBalanceHeuristic(OUTPUTFILE1);
+			
 		}
 		else{
 			//Run verifier
