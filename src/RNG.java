@@ -13,12 +13,12 @@ public class RNG {
 	{
 		Random rand = new Random();
 		
-		//int n = rand.nextInt(1000) + 1;
-		//int m = rand.nextInt(50) + 1;
+		int n = rand.nextInt(1000) + 1;
+		int m = rand.nextInt(50) + 1;
 		
 		//To keep it simple for testing, use smaller sizes temporarily
-		int n = rand.nextInt(10) + 1;
-		int m = rand.nextInt(5) + 1;
+		//int n = rand.nextInt(10) + 1;
+		//int m = rand.nextInt(5) + 1;
 		
 		BufferedWriter bw = null;
 		FileWriter fw = null;

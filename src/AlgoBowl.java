@@ -174,7 +174,7 @@ public class AlgoBowl {
 		
 	}
 	
-	public static void avgLoadBalanceHeuristic(String fileName) throws IOException{
+	public static void avgLoadBalanceHeuristic() throws IOException{
 		//Goal: each processor takes a share of the work based on its speed
 		
 		//First calculate the total time units needed for all tasks
@@ -205,19 +205,17 @@ public class AlgoBowl {
 					nextBest = j;
 				//  If we can assign the task to a processor and keep its load below avgWork, then make the assignment
 				else if (sortedMachines.get(j).getTotalRuntime() + (sortedTasks.get(i).runtime / sortedMachines.get(j).speed) < avgWork) {
-					sortedMachines.get(j).assign(sortedTasks.get(i));
+					sortedMachines.get(j).assignedTasks.add(sortedTasks.get(i));
 					break;
 				}	
 			}
 		
 			//If we didn't find a machine with free room, assign the task to the next best one (overload it)
-			if (!taskAssigned) sortedMachines.get(nextBest).assign(sortedTasks.get(i));
+			if (!taskAssigned) sortedMachines.get(nextBest).assignedTasks.add(sortedTasks.get(i));
 		}
 		//Complexity: O(n*k) (worst case we have to examine each processor for each task)
 		
-		//End by printing the output file!
-		findMaxTotalRuntime();
-		writeOutput(fileName);
+
 	}
 	
 	public static void writeOutput(String fileName) throws IOException{
@@ -233,12 +231,15 @@ public class AlgoBowl {
 			bw.write(String.format("%.2f", maxTotalRuntime));	
 			bw.newLine();
 			
-			//Following lines: Assigned task IDs for each machine
+			//Following lines: Assigned task IDs for each machine (Task ID starts with 1)
 			for(int i = 0; i < machines.size(); i++){
-				ArrayList<Task> temp = machines.get(i).getTasks();
-				for(int j = 0; j < temp.size(); j++){
-					bw.write(temp.get(j).index + " ");
+				if(machines.get(i).assignedTasks.isEmpty() == false){
+					ArrayList<Task> temp = machines.get(i).assignedTasks;
+					for(int j = 0; j < temp.size(); j++){
+						bw.write((temp.get(j).index + 1) + " ");
+					}
 				}
+				
 				bw.newLine();
 			}
 		} 
@@ -274,11 +275,12 @@ public class AlgoBowl {
 		readInput(inputFile);
 		double result = 0;
 		int machineID, taskID;
-		double maxRuntime;
+		double maxRuntime = 0;
 		double currentRuntime = 0;
 		
 		//Task ID starts with 1
 		Scanner s = null;
+		String temp;
 		String[] theLine;
 		try
 		{
@@ -287,27 +289,34 @@ public class AlgoBowl {
 			
 			//Read the first machine
 			machineID = 0;
-			theLine = s.nextLine().split(" ");	//The line of task runtimes
-			for(int i = 0; i < theLine.length; i++){
-				taskID = Integer.parseInt(theLine[i])-1;
-				currentRuntime = currentRuntime + tasks.get(taskID).runtime / machines.get(machineID).speed;
-			}
-			maxRuntime = currentRuntime;
-			
-			//Read the next machine if it exists
-			while(s.hasNextLine()){
-				machineID++;
-				theLine = s.nextLine().split(" ");
-				currentRuntime = 0;
-				
+			temp = s.nextLine();
+			theLine = temp.split(" ");	//The line of task runtimes
+			if(temp.isEmpty() == false){
 				for(int i = 0; i < theLine.length; i++){
 					taskID = Integer.parseInt(theLine[i])-1;
 					currentRuntime = currentRuntime + tasks.get(taskID).runtime / machines.get(machineID).speed;
 				}
+				maxRuntime = currentRuntime;
+			}			
+			
+			//Read the next machine if it exists
+			while(s.hasNextLine()){
+				machineID++;
+				temp = s.nextLine();
+				theLine = temp.split(" ");
+				currentRuntime = 0;
 				
-				if(maxRuntime < currentRuntime){
-					maxRuntime = currentRuntime;
+				if(temp.isEmpty() == false){
+					for(int i = 0; i < theLine.length; i++){
+						taskID = Integer.parseInt(theLine[i])-1;
+						currentRuntime = currentRuntime + tasks.get(taskID).runtime / machines.get(machineID).speed;
+					}
+					
+					if(maxRuntime < currentRuntime){
+						maxRuntime = currentRuntime;
+					}
 				}
+				
 			}
 			
 			//Return results, using a 1% tolerance
@@ -322,42 +331,42 @@ public class AlgoBowl {
 		{
 			e.printStackTrace();
 		}
-		finally {s.close();}
-		
 		return false;		
 	}
 	
 	public static void main(String[] args) throws IOException {
-		int option = 2;		//0: make new input. 1: Run Chamal's algorithm. 2: Run Jared's algorithm. 3. Run verifier
+		int option = 2;		//0: Make new input. 1: Chamal's algorithm. 2: Jared's algorithm. Else: Verifier.
 		
 		if(option == 0){
-			//Make new input
 			RNG.createInput(INPUTFILE1);
 		}
 		else if(option == 1){
-			//Run algorithm with existing input
 			readInput(INPUTFILE1);
 			sortMachines();
 			sortTasks();
 			
-			assignTasks();		
-			findMaxTotalRuntime();
+			assignTasks();	
 			
+			findMaxTotalRuntime();
 			writeOutput(OUTPUTFILE1);
+			
+			System.out.println(verifier(INPUTFILE1, OUTPUTFILE1));
 		}
 		else if(option == 2){
-			//Run algorithm with existing input
 			readInput(INPUTFILE1);
 			sortMachines();
 			sortTasks();
 			
-			avgLoadBalanceHeuristic(OUTPUTFILE1);
+			avgLoadBalanceHeuristic();
 			
+			findMaxTotalRuntime();
+			writeOutput(OUTPUTFILE1);
+			
+			System.out.println(verifier(INPUTFILE1, OUTPUTFILE1));
 		}
 		else{
 			//Run verifier
 			System.out.println(verifier(INPUTFILE1, OUTPUTFILE1));
 		}		
-		
 	}
 }

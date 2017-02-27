@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class Machine {
 	public int index, speed;
 	public double totalRuntime;
-	ArrayList<Task> assignedTasks;
+	public ArrayList<Task> assignedTasks;
 	
 	public Machine(int index, int speed){
 		this.index = index;
@@ -19,21 +19,16 @@ public class Machine {
 		assignedTasks = new ArrayList<Task>();
 	}
 	
-	private void computeTotalRuntime(){
-		totalRuntime = 0; //Reset to avoid bad calculations
-		for (Task t: assignedTasks) totalRuntime += t.runtime / speed;
-	}
-	
-	public void assign(Task t) {
-		assignedTasks.add(t);
+	public void computeTotalRuntime(){
+		int temp = 0;
+		for(int i = 0; i < assignedTasks.size(); i++){
+			temp = temp + assignedTasks.get(i).runtime;
+		}
+		totalRuntime = ((double) temp )/ speed;
 	}
 	
 	public double getTotalRuntime(){
 		computeTotalRuntime();
 		return totalRuntime;
-	}
-
-	public ArrayList<Task> getTasks() {
-		return assignedTasks;
 	}
 }
