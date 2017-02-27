@@ -20,6 +20,7 @@ public class Machine {
 	}
 	
 	private void computeTotalRuntime(){
+		totalRuntime = 0; //Reset to avoid bad calculations
 		for (Task t: assignedTasks) totalRuntime += t.runtime / speed;
 	}
 	

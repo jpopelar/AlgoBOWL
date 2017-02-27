@@ -104,11 +104,28 @@ public class AlgoBowl {
 		
 		//The heuristic then goes something like this:
 		//For each task, starting with the longest:
-		//  Find the fastest processor whose load is below avgWork
-		//  If that assignment would put its load above avgWork, bookmark that processor and examine the next one
-		//  If we can assign the task to a processor and keep its load below avgWork, then make the assignment
-		//  Otherwise, assign it to the bookmarked processor
-		//  Theoretically, we should not encounter the case where all processors are above avgWork with tasks still to assign
+		for (int i = sortedTasks.size()-1; i >= 0; i--) {
+			boolean taskAssigned = false; //Switches on when task is assigned in inner loop
+			int nextBest = sortedMachines.size()-1; //Default to fastest processor
+			
+
+			//  Find the fastest processor whose load is below avgWork
+			for (int j = sortedMachines.size()-1; j >= 0; j--) {
+				//  If that assignment would put its load above avgWork, bookmark that processor and examine the next one
+				if ((sortedMachines.get(j).getTotalRuntime() + (sortedTasks.get(i).runtime / sortedMachines.get(j).speed)) >= avgWork
+						&& sortedMachines.get(j).getTotalRuntime() < avgWork //Second clause avoids overloading already overloaded machines
+						&& nextBest < j) //Third clause ensures we overload the faster processors first
+					nextBest = j;
+				//  If we can assign the task to a processor and keep its load below avgWork, then make the assignment
+				else if (sortedMachines.get(j).getTotalRuntime() + (sortedTasks.get(i).runtime / sortedMachines.get(j).speed) < avgWork) {
+					sortedMachines.get(j).assign(sortedTasks.get(i));
+					break;
+				}	
+			}
+		
+			//If we didn't find a machine with free room, assign the task to the next best one (overload it)
+			if (!taskAssigned) sortedMachines.get(nextBest).assign(sortedTasks.get(i));
+		}
 		//Complexity: O(n*k) (worst case we have to examine each processor for each task)
 		
 		//End by printing the output file!
