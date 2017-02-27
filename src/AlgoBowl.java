@@ -85,7 +85,8 @@ public class AlgoBowl {
 	
 	public static void assignTasks(){
 		/*	
-		In the limit as tasks become smaller and more divisible relative to the total workload, each machine should perform an amount of work proportional to its fraction of the total work-power.
+		In the limit as tasks become smaller and more divisible relative to the total workload, 
+		each machine should perform an amount of work proportional to its fraction of the total work-power.
 		Use this as a limit to fill the machines.
 		
 		Sum the work cost over all tasks (TotalWork). This is the unit of work to be performed.
@@ -115,12 +116,12 @@ public class AlgoBowl {
 	
 	//Find totalWork
 	for(int i=0; i<tasks.size(); i++) {
-		totalWork = totalWork + tasks.get(i).runtime;			
+		totalWork += tasks.get(i).runtime;			
 	}
 	
 	//Sum Machine Speeds
 	for(int i=0; i<machines.size(); i++) {
-		sumMachineSpeeds = sumMachineSpeeds + machines.get(i).speed;
+		sumMachineSpeeds += machines.get(i).speed;
 	}
 	
 	//Find the target capacity for each machine
@@ -175,7 +176,8 @@ public class AlgoBowl {
 	}
 	
 	public static void avgLoadBalanceHeuristic(String fileName) throws IOException{
-		//Goal: each processor takes a share of the work based on its speed
+		//Goal: calculate the average work needed to be done by each processor, then organize tasks
+		//so that each processor does approximately that amount
 		
 		//First calculate the total time units needed for all tasks
 		double totTime = 0;
@@ -204,7 +206,7 @@ public class AlgoBowl {
 						&& nextBest < j) //Third clause ensures we overload the faster processors first
 					nextBest = j;
 				//  If we can assign the task to a processor and keep its load below avgWork, then make the assignment
-				else if (sortedMachines.get(j).getTotalRuntime() + (sortedTasks.get(i).runtime / sortedMachines.get(j).speed) < avgWork) {
+				else if ((sortedMachines.get(j).getTotalRuntime() + (sortedTasks.get(i).runtime / sortedMachines.get(j).speed)) < avgWork) {
 					sortedMachines.get(j).assign(sortedTasks.get(i));
 					break;
 				}	
